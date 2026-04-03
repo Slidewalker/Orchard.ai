@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO 9001:2015 — Check Phase</title>
+    <style>
+        @font-face { font-family: 'Inter'; src: local('Inter'), sans-serif; }
+        :root { --vine: #2d6a4f; --soil: #5e3a1c; --scroll: #fef9e6; }
+        body { font-family: 'Inter', sans-serif; background: #f5f3ef; color: #1e1b1a; padding: 40px; }
+        .card { background: var(--scroll); border-radius: 24px; padding: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #e6dfd3; max-width: 800px; margin: auto; }
+        h1 { color: var(--vine); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; text-decoration: none; color: var(--soil); font-weight: 600; }
+        .section { margin-bottom: 24px; padding: 20px; background: white; border-radius: 16px; }
+        .badge { background: #e8f0e7; color: var(--vine); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <a href="orchard-dashboard.html" class="back-btn">← Back to Command Center</a>
+    <div class="card">
+        <h1>Check: Audit & Monitoring (ISO 9001 Clause 9)</h1>
+        <div class="section">
+            <span class="badge">Monitoring</span>
+            <p style="margin-top:12px;">Automated auditing of winnowing accuracy and shard performance metrics.</p>
+        </div>
+        <div class="section">
+            <h3>Audit Readiness Checklist</h3>
+            <ul style="margin-top:12px; line-height: 1.6;">
+                <li>✅ <strong>Latency Check:</strong> Average sub-100ms shard latency? (Currently 78ms)</li>
+                <li>✅ <strong>Accuracy Audit:</strong> Winnowing threshold verified at 0.7?</li>
+                <li>✅ <strong>GDPR Check:</strong> Chaff deleted within 24h of classification?</li>
+                <li>✅ <strong>PII Shield:</strong> HIPAA/PII anonymization blocks active?</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

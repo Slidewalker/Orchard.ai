@@ -1,0 +1,5 @@
+# CODEOWNERS
+* @global-owner
+/backend/ @backend-team
+/frontend/ @frontend-team
+/compliance/ @compliance-officer

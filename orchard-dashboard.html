@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Orchard.ai Alpha01 — Winnowing Dashboard</title>
+    <!-- System Font Stack (Offline Premium) -->
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400 800;
+            font-display: swap;
+            src: local('Inter'), local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), sans-serif;
+        }
+    </style>
+    <!-- Chart.js Local (Offline) -->
+    <script src="assets/vendor/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f3ef;
+            color: #1e1b1a;
+            padding: 24px;
+        }
+
+        /* Biblical winnowing color palette */
+        :root {
+            --wheat: #f5d98f;
+            --wheat-dark: #e2bc5c;
+            --chaff: #c9b99a;
+            --chaff-burnt: #a58e6f;
+            --vine: #2d6a4f;
+            --vine-light: #40916c;
+            --soil: #5e3a1c;
+            --scroll: #fef9e6;
+            --threshold: #d00000;
+        }
+
+        .dashboard-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--vine) 0%, var(--soil) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo p {
+            font-size: 13px;
+            color: #5e5b59;
+            letter-spacing: 1px;
+        }
+
+        .sprint-badge {
+            background: var(--vine);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--scroll);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid #e6dfd3;
+            transition: all 0.2s;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--wheat);
+            padding-bottom: 12px;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: var(--vine);
+        }
+
+        /* Winnowing stream */
+        .winnow-stream {
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .post-item {
+            background: white;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border-left: 5px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .post-item.wheat {
+            border-left-color: var(--vine);
+        }
+        .post-item.chaff {
+            border-left-color: var(--chaff-burnt);
+            opacity: 0.8;
+        }
+
+        .post-text {
+            font-size: 14px;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #6b6a68;
+        }
+
+        .score-badge {
+            font-family: monospace;
+            background: #f0ede8;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .threshold-indicator {
+            margin-top: 12px;
+            background: #f1efe7;
+            border-radius: 40px;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* Metrics */
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--vine);
+        }
+        .metric-label {
+            font-size: 13px;
+            color: #5e5b59;
+        }
+
+        .inline-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+
+        .pdca-links a {
+            text-decoration: none;
+            color: inherit;
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+        .pdca-links a:hover {
+            background: rgba(45, 106, 79, 0.05);
+            transform: translateY(-2px);
+        }
+
+        button {
+            background: var(--vine);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        button:hover {
+            background: var(--vine-light);
+        }
+
+        .lessons-feed {
+            font-size: 13px;
+        }
+        .lesson-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e6dfd3;
+        }
+
+        canvas {
+            max-height: 180px;
+        }
+
+        /* AI Window & File Manager */
+        .ai-log {
+            background: #1a1a1a;
+            color: #4ade80;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            height: 120px;
+            overflow-y: auto;
+            margin-top: 12px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .ai-log-entry { margin-bottom: 4px; opacity: 0.9; }
+        .ai-log-entry.thinking { color: #fbbf24; }
+        
+        .file-list { margin-top: 12px; }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #eee;
+            transition: 0.2s;
+        }
+        .file-item:hover { transform: translateX(4px); border-color: var(--vine); }
+        .file-info { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+        .remove-file { color: var(--threshold); cursor: pointer; opacity: 0.6; transition: 0.2s; }
+        .remove-file:hover { opacity: 1; }
+
+        .mini-tree-container {
+            text-align: center;
+            background: linear-gradient(180deg, #f0f7f2 0%, var(--scroll) 100%);
+            border-radius: 20px;
+            padding-top: 10px;
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 780px) {
+            body { padding: 16px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<!-- SVG Icon Sprite (Offline Premium) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-seedling" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7"/><path d="M12 15a7 7 0 0 0-7-7c-1.1 0-2 1.43-2 3.2 0 1.77.9-2.14 2 1.8 0 0 1.25 2 7 2Z"/><path d="M12 15a7 7 0 0 1 7-7c1.1 0 2 1.43 2 3.2 0 1.77-.9-2.14-2 1.8 0 0-1.25 2-7 2Z"/><path d="M12 5.5s-2-2-2-4 2-2 2-2 2 0 2 2-2 4-2 4Z"/></symbol>
+    <symbol id="icon-hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2h14"/><path d="M5 22h14"/><path d="M6 2v1c0 3.3 2.7 6 6 6s6-2.7 6-6V2"/><path d="M6 22v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1"/></symbol>
+    <symbol id="icon-tachometer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="icon-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h10"/><path d="M12 4v16"/><path d="M11 20h2"/><path d="M3 13c0 2.2 1.8 4 4 4s4-1.8 4-4"/><path d="M13 13c0 2.2 1.8 4 4 4s4-1.8 4-4"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="icon-plus-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></symbol>
+    <symbol id="icon-certificate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="icon-chart-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="icon-gavel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 12.5-8 8a2.11 2.11 0 0 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m2 2 16 16"/><path d="m3.5 7.5 5 5"/></symbol>
+    <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></symbol>
+    <symbol id="icon-file-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></symbol>
+    <symbol id="icon-file-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4c0-1.1.9-2 2-2h8.5L20 7.5V22c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12v10"/><path d="M10 12h4"/><path d="M10 16h4"/><path d="M10 20h4"/></symbol>
+    <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="icon-ai-window" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M7 21h10"/><path d="M12 17v4"/></symbol>
+    <symbol id="icon-gavel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 12.5-8 8a2.11 2.11 0 0 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m2 2 16 16"/><path d="m3.5 7.5 5 5"/></symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+    <symbol id="icon-microchip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 2v2"/><path d="M12 2v2"/><path d="M16 2v2"/><path d="M8 20v2"/><path d="M12 20v2"/><path d="M16 20v2"/><path d="M2 8h2"/><path d="M2 12h2"/><path d="M2 16h2"/><path d="M20 8h2"/><path d="M20 12h2"/><path d="M20 16h2"/><rect x="8" y="8" width="8" height="8"/></symbol>
+    <symbol id="icon-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+    <symbol id="icon-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.5-1 1-4c2 1 3 2 4 4Z"/><path d="M12 15v5s1-.5 4-1c-1-2-2-3-4-4Z"/></symbol>
+    <symbol id="icon-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="icon-brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.54Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.54Z"/></symbol>
+    <symbol id="icon-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 2 5.5s-1.5 5-2.5 6.5c-1 1.5-1.5 2.5-1.5 4.5s-1 4-1 4a25.26 25.26 0 0 0-5-2.5Z"/><path d="M11 20A35.13 35.13 0 0 1 19 14"/></symbol>
+    <symbol id="icon-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 5 5"/></symbol>
+</svg>
+<div class="dashboard-container">
+    <div class="header">
+        <div class="logo">
+            <h1><svg class="icon" style="width: 28px; height: 28px; vertical-align: bottom;"><use href="#icon-seedling"></use></svg> Orchard.ai</h1>
+            <p>winnowing the wheat from the chaff · Matthew 3:12</p>
+        </div>
+        <div class="sprint-badge">
+            <svg class="icon" style="width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-hourglass"></use></svg> 90-Day Resale Sprint · Day 12
+        </div>
+    </div>
+
+    <!-- MAIN GRID: 2 columns -->
+    <div class="grid">
+        <!-- LEFT COLUMN: Winnowing Core -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-tachometer"></use></svg> Winnowing Stream</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-balance"></use></svg>
+            </div>
+            <div class="winnow-stream" id="winnowStream">
+                <!-- dynamic posts injected -->
+                <div class="post-item wheat">
+                    <div class="post-text">Q4 sales up 22% due to new pricing strategy. Actionable insight.</div>
+                    <div class="post-meta"><span>Utility:0.9 · Privacy:0.9 · CO₂:0.8</span><span class="score-badge">Score: 0.87 ✅ WHEAT</span></div>
+                </div>
+                <div class="post-item chaff">
+                    <div class="post-text">just had coffee ☕</div>
+                    <div class="post-meta"><span>Utility:0.1 · Privacy:0.95 · CO₂:0.9</span><span class="score-badge">Score: 0.49 ❌ CHAFF</span></div>
+                </div>
+            </div>
+            <div class="threshold-indicator">
+                <svg class="icon" style="width: 14px; height: 14px; vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-trash"></use></svg> Winnowing threshold: <strong>Score > 0.7 = Wheat</strong> | Chaff auto-deleted within 24h
+            </div>
+            <button id="simulatePostBtn" style="margin-top: 16px; width: 100%;"><svg class="icon" style="width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 4px; color: white;"><use href="#icon-plus-circle"></use></svg> Simulate new micro-post</button>
+        </div>
+
+        <!-- RIGHT COLUMN: ISO 9001 PDCA + Quality -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-certificate"></use></svg> ISO 9001:2015 · PDCA Cycle</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-chart-line"></use></svg>
+            </div>
+            <div class="inline-stats pdca-links">
+                <a href="Plan.html" class="pdca-box">
+                    <span class="metric-value" id="planStatus">✓</span>
+                    <div class="metric-label">Plan (Risk)</div>
+                </a>
+                <a href="Do.html" class="pdca-box">
+                    <span class="metric-value" id="doStatus">⚙️</span>
+                    <div class="metric-label">Do (Winnow)</div>
+                </a>
+                <a href="Check.html" class="pdca-box">
+                    <span class="metric-value" id="checkStatus">🔍</span>
+                    <div class="metric-label">Check (Audit)</div>
+                </a>
+                <a href="Act.html" class="pdca-box">
+                    <span class="metric-value" id="actStatus">📘</span>
+                    <div class="metric-label">Act (Lessons)</div>
+                </a>
+            </div>
+            <canvas id="qualityChart" height="150"></canvas>
+            <div style="margin-top: 16px;">
+                <div><strong>Quality objectives:</strong> Winnowing accuracy ≥95% · Latency <100ms</div>
+                <div style="font-size:13px; margin-top:8px;">✅ Current winnowing accuracy: <span id="accuracyMetric">96.2%</span></div>
+                <div style="font-size:13px;">✅ Avg shard latency: <span id="latencyMetric">78ms</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Compliance (GDPR/HIPAA) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-shield"></use></svg> Compliance · Digital Sieve</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-gavel"></use></svg>
+            </div>
+            <div class="inline-stats">
+                <div><span class="metric-value" id="chaffDeleted24h">1,247</span><div class="metric-label">Chaff deleted (24h)</div></div>
+                <div><span class="metric-value" id="piiBlocks">0</span><div class="metric-label">PII blocks (HIPAA)</div></div>
+            </div>
+            <div id="regAlert" style="background:#e8f0e7; padding:12px; border-radius:16px; margin-top:12px;">
+                <svg class="icon" style="width: 14px; height: 14px; color: var(--vine); vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-check-circle"></use></svg> No regulatory changes detected · Predictive compliance active
+            </div>
+        </div>
+
+        <!-- Technical Health: Sharding + FanOut -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-database"></use></svg> Technical Health</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-microchip"></use></svg>
+            </div>
+            <div><strong>Shard latency (p99)</strong> <span id="shardLatency" style="float:right;">89ms ✅</span></div>
+            <div class="progress-bar" style="background:#e6dfd3; border-radius:20px; margin:8px 0; height:8px;"><div id="shardBar" style="width:89%; background:var(--vine); height:8px; border-radius:20px;"></div></div>
+            <div><strong>Fan‑out queue (Kafka)</strong> <span id="queueDepth" style="float:right;">312 messages</span></div>
+            <div><strong>Bedrock workers:</strong> 4/4 active</div>
+            <div style="margin-top:16px;"><svg class="icon" style="width: 14px; height: 14px; color: var(--vine); vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-check-circle"></use></svg> User‑based sharding: Shard 01 · Shard 02 · Shard 03</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Financial: 90-Day Sprint -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-coins"></use></svg> Financial · Resale Sprint</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-rocket"></use></svg>
+            </div>
+            <div><strong>Burn rate (monthly)</strong> <span id="burnRate" style="float:right;">$142 / $2,000 equity line</span></div>
+            <div><strong>AWS Startup Grant</strong> $100,000 · <strong>Kraken credits</strong> 2M/week</div>
+            <div style="margin-top:12px; background:#2d6a4f10; padding:12px; border-radius:16px;">
+                <svg class="icon" style="width: 14px; height: 14px; color: var(--vine); vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-chart-line"></use></svg> Resale readiness score: <span id="resaleScore" style="font-weight:800;">72%</span> (Target 90% by Day 90)
+            </div>
+            <a href="moneytree.html" style="display: block; width: 100%; border: 1px solid var(--vine); color: var(--vine); background: transparent; text-align: center; padding: 8px; border-radius: 40px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 12px; transition: 0.2s;">
+                <svg class="icon" style="width: 14px; height: 14px; vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-seedling"></use></svg> View Growth (Money Tree)
+            </a>
+        </div>
+
+        <!-- Lessons Learned Feed -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-book-open"></use></svg> Lessons Learned · Winnowing Refinement</h2>
+                <svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-brain"></use></svg>
+            </div>
+            <div class="lessons-feed" id="lessonsFeed">
+                <div class="lesson-item"><svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"><use href="#icon-leaf"></use></svg> <strong>Chaff misclassified as wheat</strong> – threshold adjusted 0.68 → 0.70 (Day 9)</div>
+                <div class="lesson-item"><svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"><use href="#icon-tachometer"></use></svg> <strong>Shard 03 latency spike</strong> – added Redis replica, latency now 82ms</div>
+                <div class="lesson-item"><svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"><use href="#icon-leaf"></use></svg> <strong>CO₂ footprint >10g per post</strong> – optimized Bedrock calls, -32% emissions</div>
+            </div>
+            <button id="addLessonBtn" style="margin-top:12px; width:100%; background:#5e3a1c;"><svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom; color: white;"><use href="#icon-pen"></use></svg> Log new lesson (ISO 9001 Act phase)</button>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Orchard Growth (Mini Tree) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-seedling"></use></svg> Tree Growth Progress</h2>
+                <a href="moneytree.html" style="font-size: 11px; color: var(--vine); font-weight: 600;">Full View →</a>
+            </div>
+            <div class="mini-tree-container">
+                <svg id="miniTree" viewBox="0 0 200 200" style="height: 140px; width: 100%;">
+                    <path id="miniTrunk" d="M100 200 Q100 150 100 200" fill="var(--soil)" />
+                    <g id="miniFoliage" transform="translate(100, 200) scale(0.1)" fill="var(--vine-light)">
+                        <circle cx="-15" cy="-25" r="15" opacity="0.8" />
+                        <circle cx="15" cy="-25" r="18" opacity="0.9" />
+                        <circle cx="0" cy="-40" r="22" opacity="0.85" />
+                    </g>
+                </svg>
+            </div>
+            <div style="font-size: 12px; color: #6b6a68; text-align: center;">
+                Sprint Day: <span id="sprintDay">12</span> / 90 · <strong>Status: Adolescent</strong>
+            </div>
+        </div>
+
+        <!-- AI Transparency (Thinking Window) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-ai-window"></use></svg> AI Digital Sieve Logs</h2>
+                <span class="score-badge" style="background:#e8f0e7; border: 1px solid var(--vine); font-size: 10px;">ACTIVE</span>
+            </div>
+            <div class="ai-log" id="aiLog">
+                <div class="ai-log-entry">[00:00:00] Initializing BedrockScoringAgent...</div>
+                <div class="ai-log-entry">[00:00:01] Shard Router healthy. Sub-100ms path engaged.</div>
+            </div>
+            <div style="font-size: 11px; color: #6b6a68; margin-top: 8px;">
+                Transparency: Showing live heuristics analysis for winnowing operations.
+            </div>
+        </div>
+
+        <!-- Digital Sieve (File Manager) -->
+        <div class="card">
+            <div class="card-header">
+                <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-file-text"></use></svg> Digital Sieve Storage</h2>
+                <button id="addFileBtn" style="padding: 4px 10px; font-size: 11px;"><svg class="icon" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px; color: white;"><use href="#icon-upload"></use></svg> Add</button>
+            </div>
+            <div class="file-list" id="fileList">
+                <div class="file-item">
+                    <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: var(--vine);"><use href="#icon-file-text"></use></svg> roadmap_90day.md</div>
+                    <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
+                </div>
+                <div class="file-item">
+                    <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: #5e3a1c;"><use href="#icon-file-archive"></use></svg> iso_audit_v1.zip</div>
+                    <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
+                </div>
+            </div>
+            <div style="font-size: 11px; color: #6b6a68; margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px;">
+                Supported: .md, .zip, .pdf, .docx, .sql
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Orchard.ai Dashboard Appliance ----------
+    // Mock API endpoints — replace with Laravel backend calls
+    let winnowingPosts = [];
+
+    async function fetchWinnowingStream() {
+        try {
+            const res = await fetch('/api/winnowing/stream');
+            if(!res.ok) throw new Error("API not active");
+            const data = await res.json();
+            winnowingPosts = data.posts;
+            renderWinnowStream();
+        } catch (error) {
+            console.info("Orchard.ai: Local-only mode active (No backend detected). Seeding mock winnowing results.");
+            // Seed 3 initial wheat/chaff to ensure dashboard is alive
+            simulateMicroPost();
+            simulateMicroPost();
+            simulateMicroPost();
+        }
+    }
+
+    function renderWinnowStream() {
+        const container = document.getElementById('winnowStream');
+        if (!container) return;
+        container.innerHTML = winnowingPosts.map(post => `
+            <div class="post-item ${post.verdict}">
+                <div class="post-text">${escapeHtml(post.text)}</div>
+                <div class="post-meta">
+                    <span>Utility:${post.utility} · Privacy:${post.privacy} · CO₂:${post.co2}</span>
+                    <span class="score-badge">Score: ${post.score} ${post.verdict === 'wheat' ? '✅ WHEAT' : '❌ CHAFF'}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Simulate new micro-post (240 chars max)
+    function simulateMicroPost() {
+        const randomTexts = [
+            "Breaking: Orchard.ai winnowing accuracy hits 97% this hour",
+            "Just finished sprint planning. Wheat: 3 new features. Chaff: 2 bugs discarded.",
+            "My lunch was great 🍎 (non-actionable → chaff)",
+            "GDPR update: New consent rules — our digital sieve auto-adapted.",
+            "Shard rebalancing completed under 100ms latency, praise the winnowing."
+        ];
+        const randomText = randomTexts[Math.floor(Math.random() * randomTexts.length)];
+        const utility = Math.random() > 0.6 ? 0.85 : 0.2;
+        const privacy = 0.9 + Math.random() * 0.09;
+        const co2 = 0.7 + Math.random() * 0.25;
+        let score = (utility * 0.5) + (privacy * 0.3) + (co2 * 0.2);
+        score = parseFloat(score.toFixed(2));
+        const verdict = score > 0.7 ? "wheat" : "chaff";
+        const newPost = { text: randomText, utility, privacy, co2, score, verdict };
+        winnowingPosts.unshift(newPost);
+        if (winnowingPosts.length > 12) winnowingPosts.pop();
+        renderWinnowStream();
+
+        // update chaff counter if needed
+        if(verdict === 'chaff') {
+            let chaffCount = parseInt(document.getElementById('chaffDeleted24h').innerText);
+            document.getElementById('chaffDeleted24h').innerText = chaffCount + 1;
+        }
+        // update accuracy metric mock
+        let acc = 94 + Math.random() * 4;
+        document.getElementById('accuracyMetric').innerText = acc.toFixed(1) + "%";
+    }
+
+    // Quality Objectives Chart (ISO 9001)
+    const ctx = document.getElementById('qualityChart').getContext('2d');
+    let qualityChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Winnowing Accuracy', 'Latency (<100ms)', 'Storage Reduction', 'Zero Fines'],
+            datasets: [{
+                label: 'Current Performance',
+                data: [96.2, 89, 44, 100],
+                backgroundColor: 'rgba(45, 106, 79, 0.2)',
+                borderColor: '#2d6a4f',
+                pointBackgroundColor: '#40916c',
+                pointBorderColor: '#fff',
+                borderWidth: 2
+            }, {
+                label: 'Target (Day 90)',
+                data: [98, 95, 50, 100],
+                backgroundColor: 'rgba(94, 58, 28, 0.1)',
+                borderColor: '#c9b99a',
+                borderDash: [5,5],
+                pointRadius: 3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true }
+    });
+
+    function updateMetricsFromAPI() {
+        // Simulate live metrics (replace with fetch('/api/metrics'))
+        document.getElementById('latencyMetric').innerText = Math.floor(70 + Math.random() * 20) + "ms";
+        document.getElementById('shardLatency').innerText = Math.floor(70 + Math.random() * 25) + "ms ✅";
+        document.getElementById('shardBar').style.width = (70 + Math.random() * 20) + "%";
+        document.getElementById('queueDepth').innerText = Math.floor(200 + Math.random() * 400) + " messages";
+        document.getElementById('burnRate').innerHTML = `$${Math.floor(120 + Math.random() * 50)} / $2,000 equity line`;
+        let readiness = 70 + Math.random() * 10;
+        document.getElementById('resaleScore').innerText = Math.floor(readiness) + "%";
+
+        // update PDCA icons (mock)
+        document.getElementById('planStatus').innerHTML = '✓';
+        document.getElementById('doStatus').innerHTML = '⚙️';
+        document.getElementById('checkStatus').innerHTML = '🔍';
+        document.getElementById('actStatus').innerHTML = '📘';
+
+        // Update Tree and AI Logs
+        updateMiniTree();
+        logAiAction("Scanning shard 01 for latency spikes...");
+    }
+
+    // Lessons Learned
+    document.getElementById('addLessonBtn')?.addEventListener('click', () => {
+        const newLesson = prompt("Enter a lesson learned (technical error, winnowing mistake, corrective action):");
+        if(newLesson && newLesson.trim()) {
+            const feedDiv = document.getElementById('lessonsFeed');
+            const lessonDiv = document.createElement('div');
+            lessonDiv.className = 'lesson-item';
+            lessonDiv.innerHTML = `<svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"><use href="#icon-leaf"></use></svg> <strong>New:</strong> ${escapeHtml(newLesson.substring(0, 180))}`;
+            feedDiv.prepend(lessonDiv);
+            logAiAction(`LESSON: logged "${newLesson.substring(0, 30)}..."`, "thinking");
+            console.log(`[LESSONS LEARNED] ${new Date().toISOString()} - ${newLesson}`);
+            alert("Logged. This entry will be reviewed in next Management Review (ISO 9001 clause 10.2).");
+        }
+    });
+
+    document.getElementById('simulatePostBtn')?.addEventListener('click', () => {
+        simulateMicroPost();
+        logAiAction("Winnowing post ingest in progress...", "thinking");
+    });
+
+    // Auto-refresh metrics every 12 seconds
+    setInterval(() => {
+        updateMetricsFromAPI();
+        if (qualityChart) {
+            let newAccuracy = parseFloat(document.getElementById('accuracyMetric').innerText);
+            qualityChart.data.datasets[0].data[0] = newAccuracy;
+            qualityChart.update();
+        }
+    }, 12000);
+
+    // AI Logging logic
+    function logAiAction(msg, type = 'normal') {
+        const log = document.getElementById('aiLog');
+        if (!log) return;
+        const entry = document.createElement('div');
+        entry.className = `ai-log-entry ${type}`;
+        const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        entry.innerText = `[${time}] ${msg}`;
+        log.prepend(entry);
+        if (log.children.length > 20) log.lastElementChild.remove();
+    }
+
+    // Mini Tree Logic
+    function updateMiniTree() {
+        const day = 12 + Math.floor(Math.random() * 5); // simulated progress
+        document.getElementById('sprintDay').innerText = day;
+        const trunk = document.getElementById('miniTrunk');
+        const foliage = document.getElementById('miniFoliage');
+        
+        const height = 200 - (day * 1.2);
+        const thickness = 10 + (day / 4);
+        trunk.setAttribute('d', `M${100 - thickness} 200 Q100 ${height} ${100 + thickness} 200`);
+        foliage.setAttribute('transform', `translate(100, ${height}) scale(${0.3 + (day/90)})`);
+    }
+
+    // File Manager logic
+    function removeFile(el) {
+        if(confirm("Confirm deletion from Digital Sieve storage? (ISO 9001 Clause 8.2)")) {
+            el.closest('.file-item').remove();
+            logAiAction("REMOVAL: user deleted file from sieve storage", "thinking");
+        }
+    }
+
+    document.getElementById('addFileBtn')?.addEventListener('click', () => {
+        const name = prompt("Enter file name (e.g. audit_record.pdf):");
+        if(name) {
+            const list = document.getElementById('fileList');
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            let icon = 'icon-file-text';
+            if (name.includes('.zip')) icon = 'icon-file-archive';
+            if (name.includes('.sql') || name.includes('.php')) icon = 'icon-file-code';
+            
+            item.innerHTML = `
+                <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: var(--vine);"><use href="#icon-${icon === 'icon-file-text' ? 'file-text' : (icon === 'icon-file-archive' ? 'file-archive' : 'file-code')}"></use></svg> ${escapeHtml(name)}</div>
+                <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
+            `;
+            list.prepend(item);
+            logAiAction(`INGEST: Added ${name} to Digital Sieve`, "thinking");
+        }
+    });
+
+    // Initial load
+    fetchWinnowingStream();
+    updateMetricsFromAPI();
+</script>
+</body>
+</html>

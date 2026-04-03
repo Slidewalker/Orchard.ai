@@ -1,0 +1,7 @@
+{
+  "name": "orchard-mobile",
+  "version": "1.0.0",
+  "dependencies": {
+    "react-native": "*"
+  }
+}

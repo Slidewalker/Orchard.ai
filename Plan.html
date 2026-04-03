@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO 9001:2015 — Plan Phase</title>
+    <style>
+        @font-face { font-family: 'Inter'; src: local('Inter'), sans-serif; }
+        :root { --vine: #2d6a4f; --soil: #5e3a1c; --scroll: #fef9e6; }
+        body { font-family: 'Inter', sans-serif; background: #f5f3ef; color: #1e1b1a; padding: 40px; }
+        .card { background: var(--scroll); border-radius: 24px; padding: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #e6dfd3; max-width: 800px; margin: auto; }
+        h1 { color: var(--vine); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; text-decoration: none; color: var(--soil); font-weight: 600; }
+        .section { margin-bottom: 24px; padding: 20px; background: white; border-radius: 16px; }
+        .badge { background: #e8f0e7; color: var(--vine); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <a href="orchard-dashboard.html" class="back-btn">← Back to Command Center</a>
+    <div class="card">
+        <h1>Plan: Context & Risk (ISO 9001 Clause 6)</h1>
+        <div class="section">
+            <span class="badge">Requirement</span>
+            <p style="margin-top:12px;">Identify internal/external issues and risks that could impact the winnowing accuracy or sharding latency targets.</p>
+        </div>
+        <div class="section">
+            <h3>Current Risk Register</h3>
+            <ul style="margin-top:12px; line-height: 1.6;">
+                <li><strong>Shard Imbalance:</strong> Probability: Low | Impact: High (Mitigation: CRC32 Hashing)</li>
+                <li><strong>Bedrock Latency:</strong> Probability: Medium | Impact: Medium (Mitigation: Asynchronous Worker Pools)</li>
+                <li><strong>GDPR Non-compliance:</strong> Probability: Low | Impact: Critical (Mitigation: Automated 24h Chaff Deletion)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

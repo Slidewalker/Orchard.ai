@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orchard.ai — Money Tree Growth</title>
+    <!-- System Fonts -->
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400 800;
+            font-display: swap;
+            src: local('Inter'), local('Segoe UI'), local('Roboto'), local('Helvetica Neue'), sans-serif;
+        }
+    </style>
+    <!-- Chart.js Local -->
+    <script src="assets/vendor/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --wheat: #f5d98f;
+            --wheat-dark: #e2bc5c;
+            --vine: #2d6a4f;
+            --vine-light: #40916c;
+            --soil: #5e3a1c;
+            --scroll: #fef9e6;
+            --trunk: #7a5c3e;
+            --leaf-green: #386641;
+            --fruit: #d00000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f3ef;
+            color: #1e1b1a;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--scroll);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e6dfd3;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--soil);
+        }
+
+        p.subtitle {
+            color: #6b6a68;
+            margin-bottom: 32px;
+        }
+
+        /* The Tree Visualization */
+        .tree-viewport {
+            height: 480px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #e0f2fe 0%, #fef9e6 100%);
+            border-radius: 20px;
+            border: 1px solid #d1dbd0;
+        }
+
+        #moneyTreeSvg {
+            width: 100%;
+            height: 100%;
+            transition: all 0.5s ease;
+        }
+
+        .soil-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            background: var(--soil);
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--vine);
+            cursor: pointer;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 24px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #e6dfd3;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--vine);
+        }
+
+        .stat-lbl {
+            font-size: 12px;
+            color: #6b6a68;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        canvas {
+            margin-top: 24px;
+            max-height: 200px;
+        }
+
+        .btn-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--soil);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Fruit Classes */
+        .fruit {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .fruit.visible {
+            opacity: 1;
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+
+<a href="orchard-dashboard.html" class="btn-home">← Dashboard</a>
+
+<div class="container">
+    <h1>Orchard.ai Money Tree</h1>
+    <p class="subtitle">Winnowing wheat strengthens the roots · 90-Day Resale Sprint Growth</p>
+
+    <div class="tree-viewport">
+        <div class="soil-base"></div>
+        <svg id="moneyTreeSvg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMax meet">
+            <!-- Soil and Base -->
+            <path d="M50 400 Q200 370 350 400" fill="var(--soil)" />
+            
+            <!-- Dynamic Trunk (Controlled by JS) -->
+            <path id="treeTrunk" d="M190 400 Q200 300 210 400" fill="var(--trunk)" />
+            
+            <!-- Foliage Groups -->
+            <g id="foliageGroup" transform="translate(200, 350) scale(0.1)">
+                <!-- Circles representing leaves -->
+                <circle cx="-40" cy="-60" r="40" fill="var(--leaf-green)" opacity="0.8" />
+                <circle cx="40" cy="-60" r="45" fill="var(--vine)" opacity="0.9" />
+                <circle cx="0" cy="-100" r="50" fill="var(--vine-light)" opacity="0.85" />
+                <circle cx="-30" cy="-120" r="35" fill="var(--leaf-green)" opacity="0.9" />
+                <circle cx="30" cy="-120" r="40" fill="var(--leaf-green)" opacity="0.8" />
+            </g>
+
+            <!-- Fruits (Apples/Wheat) -->
+            <g id="fruitGroup">
+                <circle class="fruit" cx="170" cy="220" r="8" fill="var(--fruit)" />
+                <circle class="fruit" cx="230" cy="210" r="8" fill="var(--fruit)" />
+                <circle class="fruit" cx="200" cy="180" r="8" fill="var(--fruit)" />
+                <circle class="fruit" cx="160" cy="190" r="8" fill="var(--fruit)" />
+                <circle class="fruit" cx="240" cy="230" r="8" fill="var(--fruit)" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="growthSlider">Maturity Progress (Day 1 - Day 90)</label>
+            <input type="range" id="growthSlider" min="1" max="90" value="12">
+            <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:#6b6a68;">
+                <span>Adolescent</span>
+                <span>Adult</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="yieldSlider">Fruit Bearing Potential (Yield %)</label>
+            <input type="range" id="yieldSlider" min="0" max="100" value="0">
+             <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:#6b6a68;">
+                <span>Buds</span>
+                <span>Harvest Ready</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-item">
+            <span class="stat-val" id="dayDisplay">12</span>
+            <span class="stat-lbl">Sprint Day</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val" id="readinessDisplay">45%</span>
+            <span class="stat-lbl">Resale Readiness</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-val" id="wheatDisplay">1,247</span>
+            <span class="stat-lbl">Total Wheat</span>
+        </div>
+    </div>
+
+    <canvas id="growthChart" width="800" height="200"></canvas>
+</div>
+
+<script>
+    const growthSlider = document.getElementById('growthSlider');
+    const yieldSlider = document.getElementById('yieldSlider');
+    const trunk = document.getElementById('treeTrunk');
+    const foliage = document.getElementById('foliageGroup');
+    const fruits = document.querySelectorAll('.fruit');
+    const dayDisplay = document.getElementById('dayDisplay');
+    const readinessDisplay = document.getElementById('readinessDisplay');
+
+    function updateTree() {
+        const day = parseInt(growthSlider.value);
+        const yld = parseInt(yieldSlider.value);
+        
+        dayDisplay.innerText = day;
+        readinessDisplay.innerText = Math.floor(day * 1.1) + "%";
+
+        // Update Trunk: Grow in height and thickness
+        const height = 400 - (day * 2.5);
+        const thickness = Math.min(60, 20 + (day / 2));
+        trunk.setAttribute('d', `M${200 - thickness/2} 400 Q200 ${height} ${200 + thickness/2} 400`);
+        
+        // Update Foliage: Scale and position
+        const scale = 0.1 + (day / 90) * 0.9;
+        foliage.setAttribute('transform', `translate(200, ${height}) scale(${scale})`);
+
+        // Update Fruits
+        fruits.forEach((fruit, index) => {
+            if (yld > (index * 20) && day > 45) { // Only bear fruit after 45 days (adult)
+                fruit.classList.add('visible');
+                // adjust position relative to foliage
+                const baseOffsets = [
+                    {x: -30, y: -20}, {x: 30, y: -30}, {x: 0, y: -60}, {x: -40, y: -50}, {x: 40, y: -10}
+                ];
+                const off = baseOffsets[index];
+                fruit.setAttribute('cx', 200 + off.x * scale);
+                fruit.setAttribute('cy', height + off.y * scale);
+            } else {
+                fruit.classList.remove('visible');
+            }
+        });
+
+        updateChart(day);
+    }
+
+    // Chart Setup
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    const growthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 90}, (_, i) => i + 1),
+            datasets: [{
+                label: 'Projected Resale Value',
+                data: Array.from({length: 90}, (_, i) => Math.pow(i, 1.5) * 50),
+                borderColor: '#2d6a4f',
+                backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { display: false },
+                y: { display: false }
+            }
+        }
+    });
+
+    function updateChart(day) {
+        // Highlight current day on chart logic if needed
+        // For simplicity, we just keep the curve and could add a marker
+    }
+
+    growthSlider.addEventListener('input', updateTree);
+    yieldSlider.addEventListener('input', updateTree);
+
+    // Initial render
+    updateTree();
+</script>
+
+</body>
+</html>
