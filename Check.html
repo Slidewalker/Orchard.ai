@@ -20,18 +20,114 @@
     <div class="card">
         <h1>Check: Audit & Monitoring (ISO 9001 Clause 9)</h1>
         <div class="section">
-            <span class="badge">Monitoring</span>
+            <span class="badge">Monitoring Simulator</span>
             <p style="margin-top:12px;">Automated auditing of winnowing accuracy and shard performance metrics.</p>
         </div>
         <div class="section">
-            <h3>Audit Readiness Checklist</h3>
-            <ul style="margin-top:12px; line-height: 1.6;">
-                <li>✅ <strong>Latency Check:</strong> Average sub-100ms shard latency? (Currently 78ms)</li>
-                <li>✅ <strong>Accuracy Audit:</strong> Winnowing threshold verified at 0.7?</li>
-                <li>✅ <strong>GDPR Check:</strong> Chaff deleted within 24h of classification?</li>
-                <li>✅ <strong>PII Shield:</strong> HIPAA/PII anonymization blocks active?</li>
-            </ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3>Audit Readiness Checklist</h3>
+                <button id="runAuditBtn" style="background: var(--vine); color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif;">▶ Run Audit Protocol</button>
+            </div>
+            
+            <div id="auditList" style="display: grid; gap: 12px; margin-top:12px;">
+                <!-- Audit Item 1 -->
+                <div class="audit-item" id="audit-1" style="background: white; border: 1px solid #e6dfd3; padding: 14px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                    <div style="display: flex; align-items: center;">
+                        <span class="audit-icon" style="display:inline-block; width:24px; height:24px; text-align:center; line-height:24px; margin-right:12px; font-size: 16px;">⏳</span>
+                        <div>
+                            <strong>Latency Check:</strong> <span style="color: #6b6a68;">Average sub-100ms shard latency?</span>
+                        </div>
+                    </div>
+                    <span class="audit-result" style="font-weight: 600; opacity: 0; color: var(--vine);">78ms - Pass</span>
+                </div>
+                
+                <!-- Audit Item 2 -->
+                <div class="audit-item" id="audit-2" style="background: white; border: 1px solid #e6dfd3; padding: 14px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                    <div style="display: flex; align-items: center;">
+                        <span class="audit-icon" style="display:inline-block; width:24px; height:24px; text-align:center; line-height:24px; margin-right:12px; font-size: 16px;">⏳</span>
+                        <div>
+                            <strong>Accuracy Audit:</strong> <span style="color: #6b6a68;">Winnowing threshold verified at 0.7?</span>
+                        </div>
+                    </div>
+                    <span class="audit-result" style="font-weight: 600; opacity: 0; color: var(--vine);">Verified - Pass</span>
+                </div>
+                
+                <!-- Audit Item 3 -->
+                <div class="audit-item" id="audit-3" style="background: white; border: 1px solid #e6dfd3; padding: 14px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                    <div style="display: flex; align-items: center;">
+                        <span class="audit-icon" style="display:inline-block; width:24px; height:24px; text-align:center; line-height:24px; margin-right:12px; font-size: 16px;">⏳</span>
+                        <div>
+                            <strong>GDPR Check:</strong> <span style="color: #6b6a68;">Chaff deleted within 24h of classification?</span>
+                        </div>
+                    </div>
+                    <span class="audit-result" style="font-weight: 600; opacity: 0; color: var(--vine);">Cron OK - Pass</span>
+                </div>
+                
+                <!-- Audit Item 4 -->
+                <div class="audit-item" id="audit-4" style="background: white; border: 1px solid #e6dfd3; padding: 14px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                    <div style="display: flex; align-items: center;">
+                        <span class="audit-icon" style="display:inline-block; width:24px; height:24px; text-align:center; line-height:24px; margin-right:12px; font-size: 16px;">⏳</span>
+                        <div>
+                            <strong>PII Shield:</strong> <span style="color: #6b6a68;">HIPAA/PII anonymization blocks active?</span>
+                        </div>
+                    </div>
+                    <span class="audit-result" style="font-weight: 600; opacity: 0; color: var(--vine);">Active - Pass</span>
+                </div>
+            </div>
+            
+            <div id="auditSummary" style="margin-top: 20px; padding: 16px; background: #e8f0e7; border-radius: 12px; text-align: center; border: 1px solid var(--vine); opacity: 0; transition: opacity 0.5s ease;">
+                <strong style="color: var(--vine); font-size: 16px;">✅ ISO 9001 Clause 9: Full Compliance Audited Successfully</strong>
+            </div>
         </div>
     </div>
+
+    <script>
+        const runBtn = document.getElementById('runAuditBtn');
+        runBtn.addEventListener('click', () => {
+            runBtn.disabled = true;
+            runBtn.innerText = "Auditing...";
+            runBtn.style.opacity = "0.5";
+            
+            // Reset state
+            document.getElementById('auditSummary').style.opacity = "0";
+            for(let i=1; i<=4; i++) {
+                let s = document.getElementById('audit-' + i);
+                s.style.background = "white";
+                s.style.borderColor = "#e6dfd3";
+                s.querySelector('.audit-icon').innerText = "⏳";
+                s.querySelector('.audit-result').style.opacity = "0";
+            }
+            
+            const delays = [800, 1600, 2400, 3200];
+            const steps = [1, 2, 3, 4];
+            
+            // Simulating API or backend check ping for each Audit clause
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    let s = document.getElementById('audit-' + step);
+                    s.style.background = "#f0fdf4";
+                    s.style.borderColor = "var(--vine)";
+                    s.querySelector('.audit-icon').innerText = "✅";
+                    
+                    let resultEl = s.querySelector('.audit-result');
+                    resultEl.style.opacity = "1";
+                    
+                    if (step === 4) {
+                        setTimeout(() => {
+                            document.getElementById('auditSummary').style.opacity = "1";
+                            runBtn.disabled = false;
+                            runBtn.innerText = "▶ Run Audit Protocol";
+                            runBtn.style.opacity = "1";
+                        }, 600);
+                    }
+                }, delays[index]);
+            });
+        });
+        
+        // Auto-initialize the run visually on page load for immediate demo
+        setTimeout(() => {
+            runBtn.click();
+        }, 500);
+    </script>
 </body>
 </html>

@@ -20,19 +20,152 @@
     <div class="card">
         <h1>Do: Winnowing Operations (ISO 9001 Clause 8)</h1>
         <div class="section">
-            <span class="badge">Operation</span>
-            <p style="margin-top:12px;">Real-time execution of the weighted scoring heuristic (Utility, Privacy, Sustainability).</p>
+            <span class="badge">Operation Simulator</span>
+            <h3 style="margin-top:12px; margin-bottom: 16px;">Real-time execution of the weighted scoring heuristic</h3>
+            
+            <div style="background: #faf9f6; padding: 20px; border-radius: 12px; border: 1px solid #e6dfd3;">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 8px;">
+                        <span>Utility (Weight: 50%)</span>
+                        <span id="dispUtility">0.80</span>
+                    </label>
+                    <input type="range" id="valUtility" min="0" max="1" step="0.01" value="0.80" style="width:100%; accent-color: var(--vine);">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 8px;">
+                        <span>Privacy & Security (Weight: 30%)</span>
+                        <span id="dispPrivacy">0.90</span>
+                    </label>
+                    <input type="range" id="valPrivacy" min="0" max="1" step="0.01" value="0.90" style="width:100%; accent-color: var(--vine);">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 8px;">
+                        <span>Sustainability / CO₂ (Weight: 20%)</span>
+                        <span id="dispSustainability">0.75</span>
+                    </label>
+                    <input type="range" id="valSustainability" min="0" max="1" step="0.01" value="0.75" style="width:100%; accent-color: var(--vine);">
+                </div>
+                
+                <div style="padding: 20px; background: white; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                    <div style="font-size: 12px; text-transform: uppercase; color: #6b6a68; letter-spacing: 1px; margin-bottom: 4px;">Overall Winnowing Score</div>
+                    <div id="finalScore" style="font-size: 36px; font-weight: 800; color: var(--vine); margin-bottom: 12px;">0.82</div>
+                    <div id="finalVerdict" style="font-size: 14px; font-weight: bold; background: var(--vine); color: white; display: inline-block; padding: 6px 16px; border-radius: 40px;">✅ WHEAT (PASS)</div>
+                </div>
+            </div>
         </div>
         <div class="section">
-            <h3>Winnowing Engine Pipeline</h3>
-            <ol style="margin-top:12px; line-height: 2;">
-                <li><strong>Ingest:</strong> CRC32 Routing to active shard (<10ms)</li>
-                <li><strong>Score:</strong> BedrockScoringAgent processing (~50-80ms)</li>
-                <li><strong>Decide:</strong> Threshold > 0.7 classified as Wheat</li>
-                <li><strong>Store:</strong> Permanent storage for Wheat | 24h temp for Chaff</li>
-                <li><strong>Clean:</strong> Automated deletion of Chaff (GDPR Compliance)</li>
-            </ol>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3>Winnowing Engine Pipeline</h3>
+                <button id="runPipelineBtn" style="background: var(--vine); color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif;">▶ Run Data Packet</button>
+            </div>
+            
+            <div id="pipelineContainer" style="display: grid; gap: 8px;">
+                <div class="pipe-step" id="pipe-1" style="background: white; border: 1px solid #e6dfd3; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+                    <div><span class="pipe-num" style="display:inline-block; width:24px; height:24px; background:#e8f0e7; color:var(--vine); text-align:center; border-radius:50%; font-weight:bold; margin-right:8px; line-height:24px;">1</span> <strong>Ingest:</strong> CRC32 Routing to active shard</div>
+                    <span class="status-marker" style="font-size: 12px; color: #6b6a68;">&lt;10ms</span>
+                </div>
+                <div class="pipe-step" id="pipe-2" style="background: white; border: 1px solid #e6dfd3; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+                    <div><span class="pipe-num" style="display:inline-block; width:24px; height:24px; background:#e8f0e7; color:var(--vine); text-align:center; border-radius:50%; font-weight:bold; margin-right:8px; line-height:24px;">2</span> <strong>Score:</strong> BedrockScoringAgent processing</div>
+                    <span class="status-marker" style="font-size: 12px; color: #6b6a68;">~50-80ms</span>
+                </div>
+                <div class="pipe-step" id="pipe-3" style="background: white; border: 1px solid #e6dfd3; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+                    <div><span class="pipe-num" style="display:inline-block; width:24px; height:24px; background:#e8f0e7; color:var(--vine); text-align:center; border-radius:50%; font-weight:bold; margin-right:8px; line-height:24px;">3</span> <strong>Decide:</strong> Threshold > 0.7 classified as Wheat</div>
+                </div>
+                <div class="pipe-step" id="pipe-4" style="background: white; border: 1px solid #e6dfd3; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+                    <div><span class="pipe-num" style="display:inline-block; width:24px; height:24px; background:#e8f0e7; color:var(--vine); text-align:center; border-radius:50%; font-weight:bold; margin-right:8px; line-height:24px;">4</span> <strong>Store:</strong> Permanent storage for Wheat | 24h temp for Chaff</div>
+                </div>
+                <div class="pipe-step" id="pipe-5" style="background: white; border: 1px solid #e6dfd3; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+                    <div><span class="pipe-num" style="display:inline-block; width:24px; height:24px; background:#e8f0e7; color:var(--vine); text-align:center; border-radius:50%; font-weight:bold; margin-right:8px; line-height:24px;">5</span> <strong>Clean:</strong> Automated deletion of Chaff (GDPR Compliance)</div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        function updateHeuristic() {
+            const u = parseFloat(document.getElementById('valUtility').value);
+            const p = parseFloat(document.getElementById('valPrivacy').value);
+            const s = parseFloat(document.getElementById('valSustainability').value);
+            
+            document.getElementById('dispUtility').innerText = u.toFixed(2);
+            document.getElementById('dispPrivacy').innerText = p.toFixed(2);
+            document.getElementById('dispSustainability').innerText = s.toFixed(2);
+            
+            let score = (u * 0.5) + (p * 0.3) + (s * 0.2);
+            
+            const finalScoreEl = document.getElementById('finalScore');
+            const finalVerdictEl = document.getElementById('finalVerdict');
+            
+            finalScoreEl.innerText = score.toFixed(2);
+            
+            if (score > 0.70) {
+                finalScoreEl.style.color = "var(--vine)";
+                finalVerdictEl.style.background = "var(--vine)";
+                finalVerdictEl.innerText = "✅ WHEAT (PASS)";
+            } else {
+                finalScoreEl.style.color = "#a58e6f";
+                finalVerdictEl.style.background = "#a58e6f";
+                finalVerdictEl.innerText = "❌ CHAFF (FAIL)";
+            }
+        }
+        
+        ['valUtility', 'valPrivacy', 'valSustainability'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateHeuristic);
+        });
+        
+        // Initialize
+        updateHeuristic();
+
+        // Pipeline visualizer
+        const runBtn = document.getElementById('runPipelineBtn');
+        runBtn.addEventListener('click', () => {
+            runBtn.disabled = true;
+            runBtn.innerText = "Processing...";
+            runBtn.style.opacity = "0.5";
+            
+            // reset all
+            for(let i=1; i<=5; i++) {
+                let s = document.getElementById('pipe-' + i);
+                s.style.background = "white";
+                s.style.borderColor = "#e6dfd3";
+                s.querySelector('.pipe-num').style.background = "#e8f0e7";
+                s.querySelector('.pipe-num').style.color = "var(--vine)";
+            }
+            
+            // simulate pipeline with realistic delays based on the latency specs
+            const delays = [0, 80, 200, 300, 450, 600];
+            const steps = [1, 2, 3, 4, 5];
+            
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    let s = document.getElementById('pipe-' + step);
+                    s.style.background = "#f0fdf4"; 
+                    s.style.borderColor = "var(--vine)";
+                    s.querySelector('.pipe-num').style.background = "var(--vine)";
+                    s.querySelector('.pipe-num').style.color = "white";
+                    
+                    // Specific verdict visualization tying back to score heuristic
+                    if(step === 3) {
+                        const isWheat = parseFloat(document.getElementById('finalScore').innerText) > 0.7;
+                        if(!isWheat) {
+                           s.style.background = "#fdf8f6"; 
+                           s.style.borderColor = "#a58e6f";
+                           s.querySelector('.pipe-num').style.background = "#a58e6f";
+                        }
+                    }
+                    
+                    if(step === 5) {
+                        setTimeout(() => {
+                            runBtn.disabled = false;
+                            runBtn.innerText = "▶ Run Data Packet";
+                            runBtn.style.opacity = "1";
+                        }, 500);
+                    }
+                }, delays[index+1]);
+            });
+        });
+    </script>
 </body>
 </html>

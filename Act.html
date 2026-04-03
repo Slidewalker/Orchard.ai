@@ -20,17 +20,140 @@
     <div class="card">
         <h1>Act: Improvement (ISO 9001 Clause 10)</h1>
         <div class="section">
-            <span class="badge">Improvement</span>
-            <p style="margin-top:12px;">Refining the winnowing engine based on audit results and lessons learned.</p>
+            <span class="badge">Continuous Improvement Simulator</span>
+            <p style="margin-top:12px;">Refining the winnowing engine dynamically based on audit results and lessons learned.</p>
         </div>
+        
         <div class="section">
-            <h3>Recent Refinements (Day 1-12)</h3>
-            <ul style="margin-top:12px; line-height: 1.6;">
-                <li><strong>Refinement 01:</strong> Adjusted threshold to 0.7 to reduce false wheat.</li>
-                <li><strong>Refinement 02:</strong> Added Redis replicas to Shard 03 to stabilize latency.</li>
-                <li><strong>Refinement 03:</strong> Optimized Bedrock calls to reduce CO₂ emissions by 32%.</li>
-            </ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3>Refinement Deployments (Day 1-12)</h3>
+                <button id="deployAllBtn" style="background: var(--vine); color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif;">▶ Deploy All Refinements</button>
+            </div>
+            
+            <div style="display: grid; gap: 16px;">
+                <!-- Refinement 1 -->
+                <div class="refinement-card" id="ref-1" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #e6dfd3; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">Refinement 01: Adaptive Threshold</strong>
+                            <span style="font-size: 13px; color: #6b6a68;">Adjusted threshold to 0.7 to reduce false wheat.</span>
+                        </div>
+                        <span class="status-badge" style="background: #f0ede8; color: #6b6a68; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">PENDING</span>
+                    </div>
+                    <div style="background: #faf9f6; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; font-weight: 600;">False Wheat Rate:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="metric-old" style="color: #a58e6f; text-decoration: line-through;">14.2%</span>
+                            <span style="color: #c9b99a;">→</span>
+                            <span class="metric-new" style="font-weight: 800; font-size: 16px; opacity: 0.3;">3.1%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refinement 2 -->
+                <div class="refinement-card" id="ref-2" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #e6dfd3; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">Refinement 02: Infrastructure Scaling</strong>
+                            <span style="font-size: 13px; color: #6b6a68;">Added Redis replicas to Shard 03 to stabilize latency.</span>
+                        </div>
+                        <span class="status-badge" style="background: #f0ede8; color: #6b6a68; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">PENDING</span>
+                    </div>
+                    <div style="background: #faf9f6; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; font-weight: 600;">Shard 03 Latency (p99):</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="metric-old" style="color: #a58e6f; text-decoration: line-through;">210ms</span>
+                            <span style="color: #c9b99a;">→</span>
+                            <span class="metric-new" style="font-weight: 800; font-size: 16px; opacity: 0.3;">78ms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refinement 3 -->
+                <div class="refinement-card" id="ref-3" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #e6dfd3; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">Refinement 03: Green Algorithms</strong>
+                            <span style="font-size: 13px; color: #6b6a68;">Optimized Bedrock calls to reduce CO₂ emissions by 32%.</span>
+                        </div>
+                        <span class="status-badge" style="background: #f0ede8; color: #6b6a68; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">PENDING</span>
+                    </div>
+                    <div style="background: #faf9f6; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; font-weight: 600;">Carbon footprint/request:</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="metric-old" style="color: #a58e6f; text-decoration: line-through;">12.4g</span>
+                            <span style="color: #c9b99a;">→</span>
+                            <span class="metric-new" style="font-weight: 800; font-size: 16px; opacity: 0.3;">8.4g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="qualityImpact" style="margin-top: 24px; padding: 16px; background: #e8f0e7; border-radius: 12px; display: flex; align-items: center; gap: 16px; opacity: 0; transition: opacity 0.5s ease; border: 1px solid var(--vine);">
+                <div style="font-size: 32px;">📈</div>
+                <div>
+                    <strong style="color: var(--vine); display: block; margin-bottom: 4px;">ISO 9001 Act Phase Complete</strong>
+                    <span style="font-size: 13px; color: #2d6a4f;">Quality Management System updated. Winnowing efficiency increased by 18% across all shards.</span>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        const deployBtn = document.getElementById('deployAllBtn');
+        deployBtn.addEventListener('click', () => {
+            deployBtn.disabled = true;
+            deployBtn.innerText = "Deploying...";
+            deployBtn.style.opacity = "0.5";
+            
+            // Reset
+            document.getElementById('qualityImpact').style.opacity = "0";
+            for(let i=1; i<=3; i++) {
+                let card = document.getElementById('ref-' + i);
+                card.style.borderLeftColor = "#e6dfd3";
+                card.style.background = "white";
+                let badge = card.querySelector('.status-badge');
+                badge.innerText = "PENDING";
+                badge.style.background = "#f0ede8";
+                badge.style.color = "#6b6a68";
+                let newMetric = card.querySelector('.metric-new');
+                newMetric.style.opacity = "0.3";
+                newMetric.style.color = "inherit";
+            }
+            
+            const delays = [600, 1500, 2400];
+            const steps = [1, 2, 3];
+            
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    let card = document.getElementById('ref-' + step);
+                    
+                    // Animate card
+                    card.style.borderLeftColor = "var(--vine)";
+                    card.style.background = "#f0fdf4";
+                    
+                    // Animate badge
+                    let badge = card.querySelector('.status-badge');
+                    badge.innerText = "DEPLOYED ✅";
+                    badge.style.background = "var(--vine)";
+                    badge.style.color = "white";
+                    
+                    // Animate Metric
+                    let newMetric = card.querySelector('.metric-new');
+                    newMetric.style.opacity = "1";
+                    newMetric.style.color = "var(--vine)";
+                    
+                    if (step === 3) {
+                        setTimeout(() => {
+                            document.getElementById('qualityImpact').style.opacity = "1";
+                            deployBtn.disabled = false;
+                            deployBtn.innerText = "▶ Deploy All Refinements";
+                            deployBtn.style.opacity = "1";
+                        }, 600);
+                    }
+                }, delays[index]);
+            });
+        });
+    </script>
 </body>
 </html>

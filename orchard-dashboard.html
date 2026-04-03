@@ -480,6 +480,7 @@
             <div class="card-header">
                 <h2><svg class="icon" style="width: 20px; height: 20px; color: var(--vine);"><use href="#icon-file-text"></use></svg> Digital Sieve Storage</h2>
                 <button id="addFileBtn" style="padding: 4px 10px; font-size: 11px;"><svg class="icon" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 4px; color: white;"><use href="#icon-upload"></use></svg> Add</button>
+                <input type="file" id="hiddenFileInput" style="display: none;" accept=".md,.zip,.pdf,.docx,.sql">
             </div>
             <div class="file-list" id="fileList">
                 <div class="file-item">
@@ -684,8 +685,12 @@
     }
 
     document.getElementById('addFileBtn')?.addEventListener('click', () => {
-        const name = prompt("Enter file name (e.g. audit_record.pdf):");
-        if(name) {
+        document.getElementById('hiddenFileInput').click();
+    });
+
+    document.getElementById('hiddenFileInput')?.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const name = e.target.files[0].name;
             const list = document.getElementById('fileList');
             const item = document.createElement('div');
             item.className = 'file-item';
@@ -699,6 +704,9 @@
             `;
             list.prepend(item);
             logAiAction(`INGEST: Added ${name} to Digital Sieve`, "thinking");
+            
+            // Allow adding the same file again if needed
+            e.target.value = '';
         }
     });
 

@@ -20,17 +20,97 @@
     <div class="card">
         <h1>Plan: Context & Risk (ISO 9001 Clause 6)</h1>
         <div class="section">
-            <span class="badge">Requirement</span>
-            <p style="margin-top:12px;">Identify internal/external issues and risks that could impact the winnowing accuracy or sharding latency targets.</p>
+            <span class="badge">Risk Assessment Matrix</span>
+            <p style="margin-top:12px;">Identify internal/external issues and interactively apply mitigations to protect winnowing accuracy and sharding latency targets.</p>
         </div>
         <div class="section">
             <h3>Current Risk Register</h3>
-            <ul style="margin-top:12px; line-height: 1.6;">
-                <li><strong>Shard Imbalance:</strong> Probability: Low | Impact: High (Mitigation: CRC32 Hashing)</li>
-                <li><strong>Bedrock Latency:</strong> Probability: Medium | Impact: Medium (Mitigation: Asynchronous Worker Pools)</li>
-                <li><strong>GDPR Non-compliance:</strong> Probability: Low | Impact: Critical (Mitigation: Automated 24h Chaff Deletion)</li>
-            </ul>
+            <p style="font-size: 13px; color: #6b6a68; margin-bottom: 16px;">(ISO 9001 Clause 6.1: Actions to address risks and opportunities)</p>
+            
+            <div style="display: grid; gap: 16px;">
+                <!-- Risk 1 -->
+                <div class="risk-card" id="risk-1" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #f97316; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">Shard Imbalance</strong>
+                            <div style="font-size: 12px; color: #6b6a68; margin-bottom: 8px;">Probability: Low | Impact: High</div>
+                            <span class="threat-badge" style="background: #ffedd5; color: #c2410c; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">UNMITIGATED RISK: HIGH</span>
+                        </div>
+                        <button class="mitigate-btn" onclick="applyMitigation(1, 'CRC32 Hashing')" style="background: #1e1b1a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;">Apply Mitigation</button>
+                    </div>
+                    <div class="mitigation-panel" style="background: #faf9f6; padding: 10px; border-radius: 6px; display: none; align-items: center; justify-content: space-between; border: 1px dashed var(--vine);">
+                        <span style="font-size: 12px; font-weight: 600; color: var(--vine);">Mitigation Active: <span class="mitigation-text"></span></span>
+                        <span style="font-size: 11px; color: var(--vine); font-weight: bold;">RISK CONTROLLED ✅</span>
+                    </div>
+                </div>
+
+                <!-- Risk 2 -->
+                <div class="risk-card" id="risk-2" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #eab308; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">Bedrock Latency</strong>
+                            <div style="font-size: 12px; color: #6b6a68; margin-bottom: 8px;">Probability: Medium | Impact: Medium</div>
+                            <span class="threat-badge" style="background: #fef9c3; color: #a16207; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">UNMITIGATED RISK: MEDIUM</span>
+                        </div>
+                        <button class="mitigate-btn" onclick="applyMitigation(2, 'Asynchronous Worker Pools')" style="background: #1e1b1a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;">Apply Mitigation</button>
+                    </div>
+                    <div class="mitigation-panel" style="background: #faf9f6; padding: 10px; border-radius: 6px; display: none; align-items: center; justify-content: space-between; border: 1px dashed var(--vine);">
+                        <span style="font-size: 12px; font-weight: 600; color: var(--vine);">Mitigation Active: <span class="mitigation-text"></span></span>
+                        <span style="font-size: 11px; color: var(--vine); font-weight: bold;">RISK CONTROLLED ✅</span>
+                    </div>
+                </div>
+
+                <!-- Risk 3 -->
+                <div class="risk-card" id="risk-3" style="background: white; border: 1px solid #e6dfd3; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; transition: all 0.4s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div>
+                            <strong style="font-size: 15px; display: block; margin-bottom: 4px;">GDPR Non-compliance</strong>
+                            <div style="font-size: 12px; color: #6b6a68; margin-bottom: 8px;">Probability: Low | Impact: Critical</div>
+                            <span class="threat-badge" style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">UNMITIGATED RISK: CRITICAL</span>
+                        </div>
+                        <button class="mitigate-btn" onclick="applyMitigation(3, 'Automated 24h Chaff Deletion')" style="background: #1e1b1a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s;">Apply Mitigation</button>
+                    </div>
+                    <div class="mitigation-panel" style="background: #faf9f6; padding: 10px; border-radius: 6px; display: none; align-items: center; justify-content: space-between; border: 1px dashed var(--vine);">
+                        <span style="font-size: 12px; font-weight: 600; color: var(--vine);">Mitigation Active: <span class="mitigation-text"></span></span>
+                        <span style="font-size: 11px; color: var(--vine); font-weight: bold;">RISK CONTROLLED ✅</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        function applyMitigation(riskId, mitigationStrategy) {
+            const card = document.getElementById('risk-' + riskId);
+            const btn = card.querySelector('.mitigate-btn');
+            const badge = card.querySelector('.threat-badge');
+            const panel = card.querySelector('.mitigation-panel');
+            
+            // disable button
+            btn.innerText = "Securing...";
+            btn.style.opacity = "0.5";
+            btn.disabled = true;
+            
+            // simulate processing delay
+            setTimeout(() => {
+                // Remove high threat visual
+                card.style.borderLeftColor = "var(--vine)";
+                card.style.background = "#f0fdf4";
+                
+                // Update Badge
+                badge.innerText = "RESIDUAL RISK: ACCEPTABLE";
+                badge.style.background = "white";
+                badge.style.color = "var(--vine)";
+                badge.style.border = "1px solid var(--vine)";
+                
+                // Show Mitigation panel
+                panel.querySelector('.mitigation-text').innerText = mitigationStrategy;
+                panel.style.display = "flex";
+                
+                // Hide button
+                btn.style.display = "none";
+            }, 600);
+        }
+    </script>
 </body>
 </html>
