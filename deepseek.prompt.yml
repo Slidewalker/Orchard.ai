@@ -1,0 +1,8 @@
+messages:
+  - role: system
+    content: |-
+      reply with 240 character limit 
+      what are you
+  - role: user
+    content: 'Pull out the action items from this meeting transcript: {{input}}'
+model: deepseek/deepseek-v3-0324
