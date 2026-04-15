@@ -80,19 +80,29 @@
     </div>
 
     <script>
-        function applyMitigation(riskId, mitigationStrategy) {
+        async function applyMitigation(riskId, mitigationStrategy) {
             const card = document.getElementById('risk-' + riskId);
             const btn = card.querySelector('.mitigate-btn');
             const badge = card.querySelector('.threat-badge');
             const panel = card.querySelector('.mitigation-panel');
             
             // disable button
+            const originalText = btn.innerText;
             btn.innerText = "Securing...";
             btn.style.opacity = "0.5";
             btn.disabled = true;
             
-            // simulate processing delay
-            setTimeout(() => {
+            try {
+                // Send mitigation to server
+                const response = await fetch('/api/compliance/mitigate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ riskId: riskId, strategy: mitigationStrategy })
+                });
+                
+                if (!response.ok) throw new Error("Server communication failure");
+                const data = await response.json();
+
                 // Remove high threat visual
                 card.style.borderLeftColor = "var(--vine)";
                 card.style.background = "#f0fdf4";
@@ -109,7 +119,16 @@
                 
                 // Hide button
                 btn.style.display = "none";
-            }, 600);
+                
+                console.log(`[COMPLIANCE] ${data.message} Audit ID: ${data.audit_id}`);
+
+            } catch (error) {
+                console.error("Mitigation Failed:", error);
+                alert("Orchard.ai: Server connection error. Mitigation could not be officially logged.");
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

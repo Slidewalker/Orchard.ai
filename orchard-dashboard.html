@@ -275,6 +275,107 @@
             body { padding: 16px; }
             .grid { grid-template-columns: 1fr; }
         }
+
+        /* Live Chat Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .chat-bubble {
+            width: 60px;
+            height: 60px;
+            background: var(--vine);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .chat-bubble:hover { transform: scale(1.1); }
+
+        .chat-window {
+            width: 350px;
+            height: 480px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e6dfd3;
+            margin-bottom: 20px;
+        }
+        .chat-header {
+            background: var(--vine);
+            color: white;
+            padding: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: #faf9f6;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            line-height: 1.4;
+        }
+        .chat-msg.server {
+            background: #e8f0e7;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        .chat-msg.user {
+            background: var(--vine);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-footer {
+            padding: 12px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 13.5px;
+            outline: none;
+        }
+        .chat-send {
+            background: var(--vine);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -402,6 +503,7 @@
             <div class="progress-bar" style="background:#e6dfd3; border-radius:20px; margin:8px 0; height:8px;"><div id="shardBar" style="width:89%; background:var(--vine); height:8px; border-radius:20px;"></div></div>
             <div><strong>Fan‑out queue (Kafka)</strong> <span id="queueDepth" style="float:right;">312 messages</span></div>
             <div><strong>Bedrock workers:</strong> 4/4 active</div>
+            <div><strong>AI provider:</strong> <span id="aiProviderBadge" class="score-badge" style="background:#fff7ed; border: 1px solid #f59e0b; color:#92400e; font-size: 10px;">CHECKING…</span></div>
             <div style="margin-top:16px;"><svg class="icon" style="width: 14px; height: 14px; color: var(--vine); vertical-align: text-bottom; margin-right: 4px;"><use href="#icon-check-circle"></use></svg> User‑based sharding: Shard 01 · Shard 02 · Shard 03</div>
         </div>
     </div>
@@ -483,18 +585,31 @@
                 <input type="file" id="hiddenFileInput" style="display: none;" accept=".md,.zip,.pdf,.docx,.sql">
             </div>
             <div class="file-list" id="fileList">
-                <div class="file-item">
-                    <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: var(--vine);"><use href="#icon-file-text"></use></svg> roadmap_90day.md</div>
-                    <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
-                </div>
-                <div class="file-item">
-                    <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: #5e3a1c;"><use href="#icon-file-archive"></use></svg> iso_audit_v1.zip</div>
-                    <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
-                </div>
+                <div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">Loading Digital Sieve inventory...</div>
             </div>
             <div style="font-size: 11px; color: #6b6a68; margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px;">
                 Supported: .md, .zip, .pdf, .docx, .sql
             </div>
+        </div>
+    </div>
+
+    <!-- Live Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <span>Orchard.ai Assistant</span>
+                <span style="cursor: pointer;" onclick="toggleChat()">✕</span>
+            </div>
+            <div class="chat-body" id="chatBody">
+                <div class="chat-msg server">Greetings. I am the Orchard.ai Assistant. How can I assist with your winnowing operations today?</div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask about system status..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button class="chat-send" onclick="sendChatMessage()">→</button>
+            </div>
+        </div>
+        <div class="chat-bubble" onclick="toggleChat()">
+            <svg class="icon" style="width: 28px; height: 28px; color: white;"><use href="#icon-brain"></use></svg>
         </div>
     </div>
 </div>
@@ -535,43 +650,56 @@
     }
 
     function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
+        return str.replace(/[&<>"']/g, function(m) {
+            switch (m) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case "'": return '&#39;';
+                default: return m;
+            }
         });
     }
 
-    // Simulate new micro-post (240 chars max)
-    function simulateMicroPost() {
+    // Connect to real backend for dispatch
+    async function simulateMicroPost() {
         const randomTexts = [
-            "Breaking: Orchard.ai winnowing accuracy hits 97% this hour",
-            "Just finished sprint planning. Wheat: 3 new features. Chaff: 2 bugs discarded.",
-            "My lunch was great 🍎 (non-actionable → chaff)",
-            "GDPR update: New consent rules — our digital sieve auto-adapted.",
-            "Shard rebalancing completed under 100ms latency, praise the winnowing."
+            "Project Orchard Alpha 01 Health Check",
+            "Winnowing shard 01 capacity: 88%",
+            "Compliance scanning: No HIPAA violations in last 24h",
+            "Technical Debt: -12% after automated refactor",
+            "Resale readiness: 74% and climbing"
         ];
-        const randomText = randomTexts[Math.floor(Math.random() * randomTexts.length)];
-        const utility = Math.random() > 0.6 ? 0.85 : 0.2;
-        const privacy = 0.9 + Math.random() * 0.09;
-        const co2 = 0.7 + Math.random() * 0.25;
-        let score = (utility * 0.5) + (privacy * 0.3) + (co2 * 0.2);
-        score = parseFloat(score.toFixed(2));
-        const verdict = score > 0.7 ? "wheat" : "chaff";
-        const newPost = { text: randomText, utility, privacy, co2, score, verdict };
-        winnowingPosts.unshift(newPost);
-        if (winnowingPosts.length > 12) winnowingPosts.pop();
-        renderWinnowStream();
+        const text = randomTexts[Math.floor(Math.random() * randomTexts.length)];
+        
+        logAiAction(`DISPATCH: sending "${text}" to RabbitMQ...`, "thinking");
 
-        // update chaff counter if needed
-        if(verdict === 'chaff') {
-            let chaffCount = parseInt(document.getElementById('chaffDeleted24h').innerText);
-            document.getElementById('chaffDeleted24h').innerText = chaffCount + 1;
+        try {
+            const res = await fetch(`/api/winnowing/dispatch?content=${encodeURIComponent(text)}`);
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                logAiAction(`SUCCESS: Task confirmed by RabbitMQ. Processing in background.`);
+                // Refresh stream after a short delay to see if it's winnowed
+                setTimeout(fetchWinnowingStream, 2000);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            logAiAction(`ERROR: Dispatch failed. ${error.message}`, "thinking");
+            // Fallback to purely local simulation if backend fails
+            const utility = Math.random() > 0.6 ? 0.85 : 0.2;
+            const privacy = 0.9 + Math.random() * 0.09;
+            const co2 = 0.7 + Math.random() * 0.25;
+            let score = (utility * 0.5) + (privacy * 0.3) + (co2 * 0.2);
+            score = parseFloat(score.toFixed(2));
+            const verdict = score > 0.7 ? "wheat" : "chaff";
+            const newPost = { text, utility, privacy, co2, score, verdict };
+            winnowingPosts.unshift(newPost);
+            if (winnowingPosts.length > 12) winnowingPosts.pop();
+            renderWinnowStream();
         }
-        // update accuracy metric mock
-        let acc = 94 + Math.random() * 4;
-        document.getElementById('accuracyMetric').innerText = acc.toFixed(1) + "%";
     }
 
     // Quality Objectives Chart (ISO 9001)
@@ -621,18 +749,49 @@
         logAiAction("Scanning shard 01 for latency spikes...");
     }
 
-    // Lessons Learned
-    document.getElementById('addLessonBtn')?.addEventListener('click', () => {
+    // Lessons Learned (ISO 9001 Act Phase)
+    async function fetchLessons() {
+        try {
+            const res = await fetch('/api/lessons/list');
+            const data = await res.json();
+            renderLessons(data.lessons);
+        } catch (error) {
+            logAiAction("ERROR: Lessons repository unreachable.", "thinking");
+        }
+    }
+
+    function renderLessons(lessons) {
+        const feedDiv = document.getElementById('lessonsFeed');
+        if (!feedDiv) return;
+        feedDiv.innerHTML = lessons.map(lesson => `
+            <div class="lesson-item">
+                <svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;">
+                    <use href="#icon-leaf"></use>
+                </svg> 
+                <strong>${lesson.timestamp.split(' ')[0]}:</strong> ${escapeHtml(lesson.text)}
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('addLessonBtn')?.addEventListener('click', async () => {
         const newLesson = prompt("Enter a lesson learned (technical error, winnowing mistake, corrective action):");
         if(newLesson && newLesson.trim()) {
-            const feedDiv = document.getElementById('lessonsFeed');
-            const lessonDiv = document.createElement('div');
-            lessonDiv.className = 'lesson-item';
-            lessonDiv.innerHTML = `<svg class="icon" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: text-bottom;"><use href="#icon-leaf"></use></svg> <strong>New:</strong> ${escapeHtml(newLesson.substring(0, 180))}`;
-            feedDiv.prepend(lessonDiv);
-            logAiAction(`LESSON: logged "${newLesson.substring(0, 30)}..."`, "thinking");
-            console.log(`[LESSONS LEARNED] ${new Date().toISOString()} - ${newLesson}`);
-            alert("Logged. This entry will be reviewed in next Management Review (ISO 9001 clause 10.2).");
+            logAiAction(`ACT: Logging new lesson learned...`, "thinking");
+            try {
+                const res = await fetch('/api/lessons/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lesson: newLesson })
+                });
+                
+                if (res.ok) {
+                    logAiAction(`SUCCESS: Lesson stored in persistent repository.`);
+                    fetchLessons();
+                    alert("Lesson logged successfully. Verified for ISO 9001 Clause 10.2.");
+                }
+            } catch (error) {
+                logAiAction("ERROR: Failed to persist lesson.", "thinking");
+            }
         }
     });
 
@@ -676,11 +835,69 @@
         foliage.setAttribute('transform', `translate(100, ${height}) scale(${0.3 + (day/90)})`);
     }
 
-    // File Manager logic
-    function removeFile(el) {
-        if(confirm("Confirm deletion from Digital Sieve storage? (ISO 9001 Clause 8.2)")) {
-            el.closest('.file-item').remove();
-            logAiAction("REMOVAL: user deleted file from sieve storage", "thinking");
+    // File Manager logic (Digital Sieve Storage)
+    async function fetchStorageFiles() {
+        try {
+            const res = await fetch('/api/storage/files');
+            const data = await res.json();
+            renderFileList(data.files);
+        } catch (error) {
+            logAiAction("ERROR: Could not fetch storage audit logs.", "thinking");
+        }
+    }
+
+    function renderFileList(files) {
+        const list = document.getElementById('fileList');
+        if (!list) return;
+
+        if (files.length === 0) {
+            list.innerHTML = '<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">No files winnowed yet.</div>';
+            return;
+        }
+
+        list.innerHTML = files.map(file => {
+            const ext = file.name.split('.').pop();
+            let icon = 'icon-file-text';
+            if (ext === 'zip') icon = 'icon-file-archive';
+            if (['sql', 'php', 'js'].includes(ext)) icon = 'icon-file-code';
+            
+            const safeName = escapeHtml(file.name);
+            return `
+                <div class="file-item">
+                    <div class="file-info">
+                        <svg class="icon" style="width: 16px; height: 16px; color: var(--vine);"><use href="#icon-${icon}"></use></svg> 
+                        ${safeName} 
+                        <span style="font-size: 10px; color: #999; margin-left: 5px;">(${(file.size / 1024).toFixed(1)} KB)</span>
+                    </div>
+                    <div class="remove-file" 
+                         data-filename="${safeName}" 
+                         onclick="deleteFile(this)">
+                        <svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function deleteFile(param) {
+        // Handle both direct string and element-based calls
+        const name = (typeof param === 'string') ? param : param.getAttribute('data-filename');
+        
+        if(confirm(`Confirm deletion of "${name}" from Digital Sieve storage? (ISO 9001 Clause 8.2)`)) {
+            logAiAction(`REMOVAL: user deleting ${name}...`, "thinking");
+            try {
+                const res = await fetch(`/api/storage/delete?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
+                if (res.ok) {
+                    logAiAction(`SUCCESS: ${name} removed from sieve.`);
+                    fetchStorageFiles();
+                } else {
+                    const error = await res.json();
+                    throw new Error(error.error || "Server rejection");
+                }
+            } catch (error) {
+                logAiAction(`ERROR: Deletion failed. ${error.message}`, "thinking");
+                alert(`Deletion failed: ${error.message}`);
+            }
         }
     }
 
@@ -688,31 +905,107 @@
         document.getElementById('hiddenFileInput').click();
     });
 
-    document.getElementById('hiddenFileInput')?.addEventListener('change', (e) => {
+    document.getElementById('hiddenFileInput')?.addEventListener('change', async (e) => {
         if (e.target.files && e.target.files.length > 0) {
-            const name = e.target.files[0].name;
-            const list = document.getElementById('fileList');
-            const item = document.createElement('div');
-            item.className = 'file-item';
-            let icon = 'icon-file-text';
-            if (name.includes('.zip')) icon = 'icon-file-archive';
-            if (name.includes('.sql') || name.includes('.php')) icon = 'icon-file-code';
+            const file = e.target.files[0];
+            logAiAction(`INGEST: Uploading ${file.name} to Digital Sieve...`, "thinking");
             
-            item.innerHTML = `
-                <div class="file-info"><svg class="icon" style="width: 16px; height: 16px; color: var(--vine);"><use href="#icon-${icon === 'icon-file-text' ? 'file-text' : (icon === 'icon-file-archive' ? 'file-archive' : 'file-code')}"></use></svg> ${escapeHtml(name)}</div>
-                <div class="remove-file" onclick="removeFile(this)"><svg class="icon" style="width: 14px; height: 14px;"><use href="#icon-trash"></use></svg></div>
-            `;
-            list.prepend(item);
-            logAiAction(`INGEST: Added ${name} to Digital Sieve`, "thinking");
-            
-            // Allow adding the same file again if needed
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/storage/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    logAiAction(`SUCCESS: ${file.name} securely stored.`);
+                    fetchStorageFiles();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                logAiAction(`ERROR: Upload failed. ${error.message}`, "thinking");
+                alert(`Upload failed: ${error.message}`);
+            }
             e.target.value = '';
         }
     });
 
+
+    // Chat Widget Logic
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const body = document.getElementById('chatBody');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        // Add user message
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-msg user';
+        userDiv.innerText = msg;
+        body.appendChild(userDiv);
+        input.value = '';
+        body.scrollTop = body.scrollHeight;
+
+        logAiAction(`CHAT: Analyzing user input "${msg.substring(0, 15)}..."`, 'thinking');
+
+        try {
+            const res = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            const data = await res.json();
+            
+            // Add server reply
+            const serverDiv = document.createElement('div');
+            serverDiv.className = 'chat-msg server';
+            serverDiv.innerText = data.reply;
+            body.appendChild(serverDiv);
+            body.scrollTop = body.scrollHeight;
+            logAiAction(`REPLY: Assistant responded to "${msg.substring(0, 10)}..."`);
+        } catch (error) {
+            logAiAction(`ERROR: AI Backend unreachable.`, 'thinking');
+        }
+    }
+
     // Initial load
+    async function fetchAiStatus() {
+        const badge = document.getElementById('aiProviderBadge');
+        if (!badge) return;
+        try {
+            const res = await fetch('/api/ai/status');
+            if (!res.ok) throw new Error('status not ok');
+            const data = await res.json();
+            const provider = (data.provider || 'unknown').toUpperCase();
+            const configured = !!data.configured;
+            badge.textContent = configured ? `${provider} (REAL)` : `${provider} (FALLBACK)`;
+            badge.style.background = configured ? '#e8f0e7' : '#fff7ed';
+            badge.style.borderColor = configured ? 'var(--vine)' : '#f59e0b';
+            badge.style.color = configured ? 'var(--vine)' : '#92400e';
+            logAiAction(configured ? `AI provider configured: ${provider} (real model calls enabled).` : `AI provider not configured: ${provider}. Using heuristic fallback.`);
+        } catch (e) {
+            badge.textContent = 'UNKNOWN';
+            badge.style.background = '#fde8e8';
+            badge.style.borderColor = '#b91c1c';
+            badge.style.color = '#b91c1c';
+            logAiAction('ERROR: Could not read /api/ai/status. AI mode unknown.', 'thinking');
+        }
+    }
+
     fetchWinnowingStream();
+    fetchStorageFiles();
+    fetchLessons();
     updateMetricsFromAPI();
+    fetchAiStatus();
 </script>
 </body>
 </html>

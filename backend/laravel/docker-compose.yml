@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: orchardai-laravel-app
+    container_name: orchard_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8081:8000"
+
+# The backend is a minimal PHP Alpha-01 server and does not require Laravel composer bootstrapping.
